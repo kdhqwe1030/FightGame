@@ -1,3 +1,4 @@
+//기본 canvas 설정
 const canvas = document.querySelector('canvas');
 const c = canvas.getContext('2d');
 
@@ -7,6 +8,7 @@ canvas.height = 576;
 c.fillRect(0, 0, canvas.width, canvas.height);
 const gravity = 0.6;
 
+// 플레이어 객체 구현
 class Sprite {
   constructor({ position, velocity, color = 'red', offset }) {
     this.position = position;
@@ -59,6 +61,7 @@ class Sprite {
   }
 }
 
+//플레이어 1, 2 선언
 const player = new Sprite({
   position: {
     x: 0,
@@ -104,6 +107,7 @@ const keys = {
 
 let lastKey;
 
+// 공격이 닿았는지 안닿았는지
 function rectangularCollision({ rectangel1, rectangel2 }) {
   return (
     rectangel1.attackBox.position.x + rectangel1.attackBox.width >=
@@ -116,6 +120,33 @@ function rectangularCollision({ rectangel1, rectangel2 }) {
   );
 }
 
+function determineWinner({ player, enemy, timerId }) {
+  clearTimeout(timerId);
+  document.querySelector('#displayText').style.display = 'flex';
+
+  if (player.health === enemy.health) {
+    document.querySelector('#displayText').innerHTML = 'Tie';
+  } else if (player.health > enemy.health) {
+    document.querySelector('#displayText').innerHTML = 'Player 1 Wins';
+  } else if (player.health < enemy.health) {
+    document.querySelector('#displayText').innerHTML = 'Player 2 Wins';
+  }
+}
+//타이머 설정
+let timer = 60;
+let timerId;
+function decreaseTimer() {
+  if (timer > 0) {
+    timerId = setTimeout(decreaseTimer, 1000);
+    timer--;
+    document.querySelector('#timer').innerHTML = timer;
+  }
+  if (timer == 0) {
+    determineWinner({ player, enemy, timerId });
+  }
+}
+decreaseTimer();
+//애니메이션 구현 움직임 및 공격
 function animate() {
   window.requestAnimationFrame(animate);
   c.fillStyle = 'black';
@@ -123,6 +154,7 @@ function animate() {
   player.update();
   enemy.update();
 
+  //플레이어와 적 움직이기
   player.velocity.x = 0;
   enemy.velocity.x = 0;
   if (keys.a.pressed && lastKey === 'a') {
@@ -137,6 +169,7 @@ function animate() {
     enemy.velocity.x = 5;
   }
 
+  //공격 감지
   if (
     rectangularCollision({
       rectangel1: player,
@@ -160,9 +193,14 @@ function animate() {
     player.health -= 20;
     document.querySelector('#playerHealth').style.width = player.health + '%';
   }
+  //체력을 다 잃는다면
+  if (enemy.health <= 0 || player.health <= 0) {
+    determineWinner({ player, enemy, timerId });
+  }
 }
 animate();
 
+//키 설정
 window.addEventListener('keydown', (event) => {
   switch (event.key) {
     case 'd':
