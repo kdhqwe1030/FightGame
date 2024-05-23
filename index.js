@@ -30,7 +30,7 @@ const shop = new Sprite({
 //플레이어 1, 2 선언
 const player = new Fighter({
   position: {
-    x: 0,
+    x: 100,
     y: 0,
   },
   velocity: {
@@ -92,7 +92,7 @@ player.draw();
 
 const enemy = new Fighter({
   position: {
-    x: 400,
+    x: 870,
     y: 100,
   },
   velocity: {
